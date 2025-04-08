@@ -1,0 +1,107 @@
+
+                                                     **capital letter**
+
+ %{
+    #include<stdio.h>
+    #include<string.h>
+%}
+
+%%
+[A-Z] {printf("%s is a capital letter\n",yytext);}
+.  {printf("%s is not capital letter\n",yytext);}
+\n  ;
+%%
+
+int yywrap(){
+    return 1;
+}
+int main(){
+    printf("Enter the text:");
+    yylex();
+    return 0;
+}
+
+
+________________________________________________________________________________________________________________________________________________
+ 
+                                                           **count line tabs space****
+
+%{
+    #include<stdio.h>
+    int lc=0,tc=0,sc=0;
+%}
+
+%%
+[\n] {lc++;}
+[ ] {sc++;}
+[\t] {tc++;}
+%%
+
+int yywrap(){
+    return 1;
+}
+int main(){
+    printf("Enter the sentence:\n");
+    yylex();
+    printf("No. of lines: %d\n",lc);
+    printf("No. of tabs: %d\n",tc);
+    printf("No. of spaces: %d\n",sc);
+}
+
+
+________________________________________________________________________________________________________________________________________________
+
+                                                            *** Vowel or not ***
+
+%{
+#include <stdio.h>
+%}
+
+%%
+[aeiouAEIOU]    { printf("%s is a Vowel\n", yytext); }
+[a-zA-Z]        { printf("%s is a Consonant\n", yytext); }
+.               {printf("%s is not a Alphabet\n",yytext);} 
+\n              ;
+%%
+
+int yywrap() {
+    return 1;
+}
+
+int main() {
+    printf("Enter text:\n");
+    yylex();
+    return 0;
+}
+
+
+
+________________________________________________________________________________________________________________________________________________
+
+
+                                                              *** Seperte***
+
+
+%{
+    #include<stdio.h>
+%}
+
+%%
+[ \t]+          { fputc(' ', yyout); }     
+\n+             { fputc(' ', yyout); }     
+.               { fputc(yytext[0], yyout); } 
+%%
+
+int yywrap(){
+    return 1;
+}
+int main(){
+    extern FILE *yyout, *yyin;
+    yyin=fopen("input.txt","r");
+    yyout=fopen("output.txt","w");
+    yylex();
+    fclose(yyin);
+    fclose(yyout);
+    return 0;
+}
+
