@@ -1,0 +1,178 @@
+                                                            *** recursive_descent_parsing ***
+                                                              
+
+input string : (a+b)*c, a+b,a*b*c
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+
+int E(),EP(),T(),TP(),F();
+char ip[100];
+int i;
+int main(){
+    printf("\nRDP for grammar(e stands for epsilon)");
+    printf("\nE->TE' \nE'->+TE'|e \nT->FT' \nT'->*FT'|e \nF->(E)|id");
+    printf("\nenter the string to be checked: ");
+    gets(ip);
+
+    if(E()){
+        if(ip[i+1]=='\0'){
+            printf("string accepted");
+        }else{
+            printf("string not accepted");
+        }
+    }else{
+        printf("string not accept");
+    }
+}
+int E(){
+    if(T()){
+        if(EP()) return 1;
+        else return 0;
+    }else return 0;
+}
+int EP(){
+    if(ip[i]=='+'){
+        i++;
+        if(T()){
+            if(EP()){
+                return 1;
+            }else return 0;
+        } else return 0;
+    } else return 1;
+}
+int T(){
+    if(F()){
+        if(TP()){
+            return 1;
+        }else return 0;
+    } else return 0;
+}
+int TP(){
+    if(ip[i]=='*'){
+        i++;
+        if(F()){
+            if(TP()){
+                return 1;
+            } else return 0;
+        }else return 0;
+    } else return 1;
+}
+int F(){
+    if(ip[i]=='('){
+        i++;
+        if(E()){
+            if(ip[i]==')'){
+                i++;
+                return 1;
+            } else return 0;
+        } else return 0;
+    }
+    else if((ip[i]>='a'&&ip[i]<='z')||(ip[i]>='A'&&ip[i]<='Z')){
+        i++;
+        return 1;
+    }else{
+        return 0;
+    }
+}
+
+
+____________________________________________________________________________________________________________________________________________________________________
+
+                                                                    ***shift_reduce_parser***
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_RULES 10
+#define MAX_LEN 20
+#define STACK_SIZE 50
+
+char stack[STACK_SIZE];
+char input[MAX_LEN];
+char grammar[MAX_RULES][MAX_LEN];
+int top = -1;
+int num_rules;
+
+void push(char c) {
+        stack[++top] = c;
+        stack[top + 1] = '\0'; 
+}
+
+void pop(int count) {
+        top -= count;
+        stack[top + 1] = '\0'; 
+}
+
+void display(int index) {
+    printf("%s\t\t%s\t\t", stack, &input[index]);
+}
+
+int reduce() {
+    for (int i = 0; i < num_rules; i++) {
+        char *rhs = strchr(grammar[i], '>') + 1; 
+        int len = strlen(rhs);
+
+        if (top + 1 >= len && strncmp(&stack[top - len + 1], rhs, len) == 0) {
+            pop(len);
+            push(grammar[i][0]);
+            printf("Reduced using: %s\n", grammar[i]);
+            return 1;
+        }
+    }
+    return 0;
+}
+void shift(char c, int *i) {
+    push(c);
+    printf("Shift: %c\n", c);
+    (*i)++;
+}
+int main() {
+    printf("Enter number of grammar rules: ");
+    scanf("%d", &num_rules);
+    getchar();
+
+    printf("Enter grammar rules (e.g., E->E+E):\n");
+    for (int i = 0; i < num_rules; i++) {
+        scanf("%s",&grammar[i]);
+    }
+    printf("Enter input string followed by '$': ");
+    scanf("%s", input);
+    int i = 0;
+    push('$');
+    printf("\nStack\t\tInput\t\tAction\n");
+    while (1) {
+        display(i);
+        if (top == 1 && stack[0] == '$' && stack[1] == 'E' && input[i] == '$'){
+            printf("accept\n");
+            return 0;
+        }  
+        if (!reduce()) {
+            if (input[i] != '$') {
+                shift(input[i], &i);
+            } else {
+                break;
+            }
+        }
+    }
+    if (top == 1 && stack[0] == '$' && stack[1] == 'E' && input[i] == '$')
+        printf("accept\n");
+    else
+        printf("\nInvalid String\n");
+
+    return 0;
+}
+
+
+--------------------input-------------
+
+Enter number of grammar rules: 5
+Enter grammar rules (e.g., E->E+E):
+E->E+E
+E->E*E
+E->(E)
+E->id
+E->a
+
+Enter input string followed by '$':    a+a$ 
