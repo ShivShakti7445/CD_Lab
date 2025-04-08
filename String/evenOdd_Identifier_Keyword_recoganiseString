@@ -1,0 +1,232 @@
+
+                                                              ****recognise_string a*,a*b,abb  ***
+
+
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+bool is_a_star(char *str) {
+    for (int i = 0; str[i] != '\0'; i++) {
+        if (str[i] != 'a') {
+            return false;
+        }
+    }
+    return true;
+}
+bool is_a_star_b_plus(char *str) {
+    int i = 0;
+    while (str[i] == 'a') {
+        i++;
+    }
+    if (str[i] != 'b') {
+        return false;
+    }
+    while (str[i] == 'b') {
+        i++;
+    }
+    return (str[i] == '\0');
+}
+bool is_abb(char *str) {
+    return (strcmp(str, "abb") == 0);
+}
+int main() {
+    char str[100];
+
+    printf("Enter a String: ");
+    scanf("%s", str);
+
+    if (is_a_star(str)) {
+        printf("String is accepted under 'a*'\n");
+    } else if (is_a_star_b_plus(str)) {
+        printf("String is accepted under 'a*b+'\n");
+    } else if (is_abb(str)) {
+        printf("String is accepted under 'abb'\n");
+    } else {
+        printf("String not accepted.\n");
+    }
+    return 0;
+}
+
+____________________________________________________________________________________________________________________________________________________
+
+                                                               *** Separate Even and Odd Numbers***
+
+#include <stdio.h>
+int main() {
+    FILE *input, *evenFile, *oddFile;
+    int num;
+    input = fopen("numbers.txt", "r");
+    if (input == NULL) {
+        printf("Unable to open numbers.txt\n");
+        return 1;
+    }
+    evenFile = fopen("even.txt", "w");
+    oddFile = fopen("odd.txt", "w");
+
+    if (evenFile == NULL || oddFile == NULL) {
+        printf("Error opening even.txt or odd.txt\n");
+        return 1;
+    }
+    while (fscanf(input, "%d", &num) != EOF) {
+        if (num % 2 == 0)
+            fprintf(evenFile, "%d\n", num);
+        else
+            fprintf(oddFile, "%d\n", num);
+    }
+    fclose(input);
+    fclose(evenFile);
+    fclose(oddFile);
+
+    printf("Separation complete. Check even.txt and odd.txt\n");
+    return 0;
+}
+
+____________________________________________________________________________________________________________________________________________________
+                                                  *** Check Whether Words Are Keywords or not ***  
+                                                  
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#define MAX_LEN 1000
+const char *keywords[] = {
+    "break", "case", "char", "const", "continue", "default", "do", "double",
+    "else", "float", "for", "if", "int", "long", "return", "switch", "void",  "while"};
+int isKeyword(const char *word) {
+    for (int i = 0; i < sizeof(keywords)/sizeof(keywords[0]); i++) {
+        if (strcmp(word, keywords[i]) == 0) return 1;
+    }
+    return 0;
+}
+void processLine(char *line, FILE *outFile) {
+    char *token = strtok(line, " ;,(){}[]\n\t");
+
+    while (token != NULL) {
+        if (isKeyword(token)) {
+            printf("  -> '%s' is a keyword\n", token);
+            fprintf(outFile, "%s\n", token);
+        } else {
+            printf("  -> '%s' is NOT a keyword\n", token);
+        }
+        token = strtok(NULL, " ;,(){}[]\n\t");
+    }
+}
+
+int main() {
+    FILE *input, *output;
+    char line[MAX_LEN];
+    int lineCount = 0;
+
+    input = fopen("input.c", "r");
+    output = fopen("keywords.txt", "w");
+
+    if (input == NULL) {
+        printf("Cannot open input.c\n");
+        return 1;
+    }
+
+    printf("Processing file line by line:\n\n");
+
+    while (fgets(line, MAX_LEN, input)) {
+        lineCount++;
+        printf("Line %d: %s", lineCount, line);
+        processLine(line, output);
+        printf("\n");
+    }
+
+    fclose(input);
+    fclose(output);
+
+    printf("All keywords written to keywords.txt\n");
+    return 0;
+}
+
+---------input.c-----------
+
+int main() {
+    int a = 10;
+    float b = 5.5;
+    if (a > b) {
+        return 1;
+    }
+    return 0;
+}
+
+
+
+____________________________________________________________________________________________________________________________________________________
+                        
+                                                                       *** Check Identifier ***
+
+
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_LEN 1000
+const char *keywords[] = {
+    "break", "case", "char", "const", "continue", "default", "do", "double",
+    "else", "float", "for", "if", "int", "long", "return", "switch", "void",  "while"
+};
+int isKeyword(const char *word) {
+    for (int i = 0; i < sizeof(keywords)/sizeof(keywords[0]); i++) {
+        if (strcmp(word, keywords[i]) == 0)
+            return 1;
+    }
+    return 0;
+}
+int isValidIdentifier(const char *word) {
+    if (isKeyword(word))
+        return 0;
+    if (!isalpha(word[0]) && word[0] != '_')
+        return 0;
+    for (int i = 1; word[i]; i++) {
+        if (!isalnum(word[i]) && word[i] != '_')
+            return 0;
+    }
+
+    return 1;
+}
+
+void processLine(char *line, FILE *outFile) {
+    char *token = strtok(line, " ;,(){}[]\n\t=+*/-<>&|!");
+
+    while (token != NULL) {
+        if (isValidIdentifier(token)) {
+            printf("  -> '%s' is a VALID identifier\n", token);
+            fprintf(outFile, "%s\n", token);
+        } else {
+            printf("  -> '%s' is NOT a valid identifier\n", token);
+        }
+        token = strtok(NULL, " ;,(){}[]\n\t=+*/-<>&|!");
+    }
+}
+
+int main() {
+    FILE *input, *output;
+    char line[MAX_LEN];
+    int lineNumber = 0;
+    input = fopen("inputs.c", "r");
+    output = fopen("identifiers.txt", "w");
+    if (input == NULL) {
+        printf("Cannot open input.c\n");
+        return 1;
+    }
+    printf("Line-by-line identifier check from input.c:\n\n");
+    while (fgets(line, MAX_LEN, input)) {
+        lineNumber++;
+        printf("Line %d: %s", lineNumber, line);
+        processLine(line, output);
+        printf("\n");
+    }
+    fclose(input);
+    fclose(output);
+    printf("All valid identifiers saved to identifiers.txt\n");
+    return 0;
+}
+
+------------- inputs.c-------------------------
+int main() {
+    int num1 = 10, num_2;
+    float 2value = 3.14;
+    return 0;
+}
