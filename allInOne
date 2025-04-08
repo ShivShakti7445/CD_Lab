@@ -1,0 +1,714 @@
+
+                                           ***Scan and Count the number of characters, words, and lines****
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+int main() {
+    FILE *file;
+    char filename[100];
+    char ch;
+    int characters = 0, words = 0, lines = 0;
+    int inWord = 0;
+    printf("Enter the file name: ");
+    scanf("%s", filename);
+    file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Cannot open file %s\n", filename);
+        return 1;
+    }
+    while ((ch = fgetc(file)) != EOF) {
+        characters++;
+
+        if (ch == '\n')
+            lines++;
+        if (isspace(ch)) {
+            inWord = 0;
+        } else if (inWord == 0) {
+            inWord = 1;
+            words++;
+        }
+    }
+    fclose(file);
+    printf("Characters: %d\n", characters);
+    printf("Words: %d\n", words);
+    printf("Lines: %d\n", lines);
+
+    return 0;
+}
+
+
+______________________________________________________________________________________________________________________________________________________________________
+
+                                                            ***names and marks of n students ****
+
+#include <stdio.h>
+struct Student {
+    char name[50];
+    int marks;
+};
+int main() {
+    int n;
+    FILE *file; 
+    printf("Enter the number of students: ");
+    scanf("%d", &n);
+    struct Student students[n];
+    file = fopen("students.txt", "w");
+    if (file == NULL) {
+        printf("Error opening file.\n");
+        return 1;
+    }
+    for (int i = 0; i < n; i++) {
+        printf("\nEnter name of student %d: ", i+1);
+        getchar();
+        fgets(students[i].name, sizeof(students[i].name), stdin);
+        printf("Enter marks of student %d: ", i+1);
+        scanf("%d", &students[i].marks);
+        fprintf(file, "Student %d: %sMarks: %d\n", i+1, students[i].name, students[i].marks);
+    }
+    fclose(file);
+    printf("\nData has been written to the file 'students.txt'.\n");
+    return 0;
+}
+
+______________________________________________________________________________________________________________________________________________________________________
+
+                                                                          ***delete a specific line***
+
+#include <stdio.h>
+#include <stdlib.h>
+int main() {
+    FILE *file, *tempFile;
+    char filename[100] = "delet.txt";
+    char tempFilename[] = "temp.txt";3
+    char buffer[1000];
+    int lineToDelete, currentLine = 1;
+    printf("Enter the line number to delete: ");
+    scanf("%d", &lineToDelete);
+    file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Cannot open file %s\n", filename);
+        return 1;
+    }
+    tempFile = fopen(tempFilename, "w");
+    if (tempFile == NULL) {
+        printf("Cannot open temporary file.\n");
+        fclose(file);
+        return 1;
+    }
+    while (fgets(buffer, sizeof(buffer), file)) {
+        if (currentLine != lineToDelete) {
+            fputs(buffer, tempFile);
+        }
+        currentLine++;
+    }
+    fclose(file);
+    fclose(tempFile);
+    remove(filename);
+    rename(tempFilename, filename);
+    printf("Line %d deleted successfully from %s.\n", lineToDelete, filename);
+    return 0;
+}
+
+______________________________________________________________________________________________________________________________________________________________________
+
+                                                        ****recognise_string a*,a*b,abb  ***
+
+
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+bool is_a_star(char *str) {
+    for (int i = 0; str[i] != '\0'; i++) {
+        if (str[i] != 'a') {
+            return false;
+        }
+    }
+    return true;
+}
+bool is_a_star_b_plus(char *str) {
+    int i = 0;
+    while (str[i] == 'a') {
+        i++;
+    }
+    if (str[i] != 'b') {
+        return false;
+    }
+    while (str[i] == 'b') {
+        i++;
+    }
+    return (str[i] == '\0');
+}
+bool is_abb(char *str) {
+    return (strcmp(str, "abb") == 0);
+}
+int main() {
+    char str[100];
+
+    printf("Enter a String: ");
+    scanf("%s", str);
+
+    if (is_a_star(str)) {
+        printf("String is accepted under 'a*'\n");
+    } else if (is_a_star_b_plus(str)) {
+        printf("String is accepted under 'a*b+'\n");
+    } else if (is_abb(str)) {
+        printf("String is accepted under 'abb'\n");
+    } else {
+        printf("String not accepted.\n");
+    }
+    return 0;
+}
+
+______________________________________________________________________________________________________________________________________________________________________
+
+                                                                *** Separate Even and Odd Numbers***
+
+#include <stdio.h>
+int main() {
+    FILE *input, *evenFile, *oddFile;
+    int num;
+    input = fopen("numbers.txt", "r");
+    if (input == NULL) {
+        printf("Unable to open numbers.txt\n");
+        return 1;
+    }
+    evenFile = fopen("even.txt", "w");
+    oddFile = fopen("odd.txt", "w");
+
+    if (evenFile == NULL || oddFile == NULL) {
+        printf("Error opening even.txt or odd.txt\n");
+        return 1;
+    }
+    while (fscanf(input, "%d", &num) != EOF) {
+        if (num % 2 == 0)
+            fprintf(evenFile, "%d\n", num);
+        else
+            fprintf(oddFile, "%d\n", num);
+    }
+    fclose(input);
+    fclose(evenFile);
+    fclose(oddFile);
+
+    printf("Separation complete. Check even.txt and odd.txt\n");
+    return 0;
+}
+
+______________________________________________________________________________________________________________________________________________________________________
+                                                     
+                                                            *** Check Whether Words Are Keywords or not ***  
+
+
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#define MAX_LEN 1000
+const char *keywords[] = {
+    "break", "case", "char", "const", "continue", "default", "do", "double",
+    "else", "float", "for", "if", "int", "long", "return", "switch", "void",  "while"};
+int isKeyword(const char *word) {
+    for (int i = 0; i < sizeof(keywords)/sizeof(keywords[0]); i++) {
+        if (strcmp(word, keywords[i]) == 0) return 1;
+    }
+    return 0;
+}
+void processLine(char *line, FILE *outFile) {
+    char *token = strtok(line, " ;,(){}[]\n\t");
+
+    while (token != NULL) {
+        if (isKeyword(token)) {
+            printf("  -> '%s' is a keyword\n", token);
+            fprintf(outFile, "%s\n", token);
+        } else {
+            printf("  -> '%s' is NOT a keyword\n", token);
+        }
+        token = strtok(NULL, " ;,(){}[]\n\t");
+    }
+}
+
+int main() {
+    FILE *input, *output;
+    char line[MAX_LEN];
+    int lineCount = 0;
+
+    input = fopen("input.c", "r");
+    output = fopen("keywords.txt", "w");
+
+    if (input == NULL) {
+        printf("Cannot open input.c\n");
+        return 1;
+    }
+
+    printf("Processing file line by line:\n\n");
+
+    while (fgets(line, MAX_LEN, input)) {
+        lineCount++;
+        printf("Line %d: %s", lineCount, line);
+        processLine(line, output);
+        printf("\n");
+    }
+
+    fclose(input);
+    fclose(output);
+
+    printf("All keywords written to keywords.txt\n");
+    return 0;
+}
+
+---------input.c-----------
+
+int main() {
+    int a = 10;
+    float b = 5.5;
+    if (a > b) {
+        return 1;
+    }
+    return 0;
+}
+
+
+
+______________________________________________________________________________________________________________________________________________________________________
+                         
+                                                                               *** Check Identifier ***
+
+
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_LEN 1000
+const char *keywords[] = {
+    "break", "case", "char", "const", "continue", "default", "do", "double",
+    "else", "float", "for", "if", "int", "long", "return", "switch", "void",  "while"
+};
+int isKeyword(const char *word) {
+    for (int i = 0; i < sizeof(keywords)/sizeof(keywords[0]); i++) {
+        if (strcmp(word, keywords[i]) == 0)
+            return 1;
+    }
+    return 0;
+}
+int isValidIdentifier(const char *word) {
+    if (isKeyword(word))
+        return 0;
+    if (!isalpha(word[0]) && word[0] != '_')
+        return 0;
+    for (int i = 1; word[i]; i++) {
+        if (!isalnum(word[i]) && word[i] != '_')
+            return 0;
+    }
+
+    return 1;
+}
+
+void processLine(char *line, FILE *outFile) {
+    char *token = strtok(line, " ;,(){}[]\n\t=+*/-<>&|!");
+
+    while (token != NULL) {
+        if (isValidIdentifier(token)) {
+            printf("  -> '%s' is a VALID identifier\n", token);
+            fprintf(outFile, "%s\n", token);
+        } else {
+            printf("  -> '%s' is NOT a valid identifier\n", token);
+        }
+        token = strtok(NULL, " ;,(){}[]\n\t=+*/-<>&|!");
+    }
+}
+
+int main() {
+    FILE *input, *output;
+    char line[MAX_LEN];
+    int lineNumber = 0;
+    input = fopen("inputs.c", "r");
+    output = fopen("identifiers.txt", "w");
+    if (input == NULL) {
+        printf("Cannot open input.c\n");
+        return 1;
+    }
+    printf("Line-by-line identifier check from input.c:\n\n");
+    while (fgets(line, MAX_LEN, input)) {
+        lineNumber++;
+        printf("Line %d: %s", lineNumber, line);
+        processLine(line, output);
+        printf("\n");
+    }
+    fclose(input);
+    fclose(output);
+    printf("All valid identifiers saved to identifiers.txt\n");
+    return 0;
+}
+
+------------- inputs.c-------------------------
+int main() {
+    int num1 = 10, num_2;
+    float 2value = 3.14;
+    return 0;
+}
+
+______________________________________________________________________________________________________________________________________________________________________
+
+                                                               *** recursive_descent_parsing ***
+
+input string : (a+b)*c, a+b,a*b*c
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+
+int E(),EP(),T(),TP(),F();
+char ip[100];
+int i;
+int main(){
+    printf("\nRDP for grammar(e stands for epsilon)");
+    printf("\nE->TE' \nE'->+TE'|e \nT->FT' \nT'->*FT'|e \nF->(E)|id");
+    printf("\nenter the string to be checked: ");
+    gets(ip);
+
+    if(E()){
+        if(ip[i+1]=='\0'){
+            printf("string accepted");
+        }else{
+            printf("string not accepted");
+        }
+    }else{
+        printf("string not accept");
+    }
+}
+int E(){
+    if(T()){
+        if(EP()) return 1;
+        else return 0;
+    }else return 0;
+}
+int EP(){
+    if(ip[i]=='+'){
+        i++;
+        if(T()){
+            if(EP()){
+                return 1;
+            }else return 0;
+        } else return 0;
+    } else return 1;
+}
+int T(){
+    if(F()){
+        if(TP()){
+            return 1;
+        }else return 0;
+    } else return 0;
+}
+int TP(){
+    if(ip[i]=='*'){
+        i++;
+        if(F()){
+            if(TP()){
+                return 1;
+            } else return 0;
+        }else return 0;
+    } else return 1;
+}
+int F(){
+    if(ip[i]=='('){
+        i++;
+        if(E()){
+            if(ip[i]==')'){
+                i++;
+                return 1;
+            } else return 0;
+        } else return 0;
+    }
+    else if((ip[i]>='a'&&ip[i]<='z')||(ip[i]>='A'&&ip[i]<='Z')){
+        i++;
+        return 1;
+    }else{
+        return 0;
+    }
+}
+
+
+______________________________________________________________________________________________________________________________________________________________________
+
+                                                                  ***shift_reduce_parser***
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_RULES 10
+#define MAX_LEN 20
+#define STACK_SIZE 50
+
+char stack[STACK_SIZE];
+char input[MAX_LEN];
+char grammar[MAX_RULES][MAX_LEN];
+int top = -1;
+int num_rules;
+
+void push(char c) {
+        stack[++top] = c;
+        stack[top + 1] = '\0'; 
+}
+
+void pop(int count) {
+        top -= count;
+        stack[top + 1] = '\0'; 
+}
+
+void display(int index) {
+    printf("%s\t\t%s\t\t", stack, &input[index]);
+}
+
+int reduce() {
+    for (int i = 0; i < num_rules; i++) {
+        char *rhs = strchr(grammar[i], '>') + 1; 
+        int len = strlen(rhs);
+
+        if (top + 1 >= len && strncmp(&stack[top - len + 1], rhs, len) == 0) {
+            pop(len);
+            push(grammar[i][0]);
+            printf("Reduced using: %s\n", grammar[i]);
+            return 1;
+        }
+    }
+    return 0;
+}
+void shift(char c, int *i) {
+    push(c);
+    printf("Shift: %c\n", c);
+    (*i)++;
+}
+int main() {
+    printf("Enter number of grammar rules: ");
+    scanf("%d", &num_rules);
+    getchar();
+
+    printf("Enter grammar rules (e.g., E->E+E):\n");
+    for (int i = 0; i < num_rules; i++) {
+        scanf("%s",&grammar[i]);
+    }
+    printf("Enter input string followed by '$': ");
+    scanf("%s", input);
+    int i = 0;
+    push('$');
+    printf("\nStack\t\tInput\t\tAction\n");
+    while (1) {
+        display(i);
+        if (top == 1 && stack[0] == '$' && stack[1] == 'E' && input[i] == '$'){
+            printf("accept\n");
+            return 0;
+        }  
+        if (!reduce()) {
+            if (input[i] != '$') {
+                shift(input[i], &i);
+            } else {
+                break;
+            }
+        }
+    }
+    if (top == 1 && stack[0] == '$' && stack[1] == 'E' && input[i] == '$')
+        printf("accept\n");
+    else
+        printf("\nInvalid String\n");
+
+    return 0;
+}
+
+
+--------------------input-------------
+
+Enter number of grammar rules: 5
+Enter grammar rules (e.g., E->E+E):
+E->E+E
+E->E*E
+E->(E)
+E->id
+E->a
+
+Enter input string followed by '$':    a+a$ 
+
+
+
+
+
+
+
+______________________________________________________________________________________________________________________________________________________________________
+                                                         
+                                                         *** arithmetic expression YACC***
+
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+int yylex();
+void yyerror(const char *s);
+%}
+
+%token NUMBER
+%left '+' '-'
+%left '*' '/'
+%right UMINUS
+
+%%
+statement: expression                     { printf("Result: %d\n", $1); }
+         ;
+
+expression: expression '+' expression     { $$ = $1 + $3; }
+          | expression '-' expression     { $$ = $1 - $3; }
+          | expression '*' expression     { $$ = $1 * $3; }
+          | expression '/' expression     { 
+                if ($3 == 0) {
+                    yyerror("Division by zero");
+                    YYABORT;
+                }
+                $$ = $1 / $3; 
+            }
+          | '(' expression ')'            { $$ = $2; }
+          | '-' expression %prec UMINUS   { $$ = -$2; }
+          | NUMBER                        { $$ = $1; }
+          ;
+%%
+
+int yylex() {
+    int c;
+    while ((c = getchar()) == ' ' || c == '\t');
+    
+    if (isdigit(c)) {
+        ungetc(c, stdin);
+        scanf("%d", &yylval);
+        return NUMBER;
+    }
+    
+    if (c == '\n')
+        return 0;
+        
+    return c;
+}
+
+void yyerror(const char *s) {
+    fprintf(stderr, "Error: %s\n", s);
+}
+
+int main() {
+    printf("Enter an arithmetic expression:\n");
+    yyparse();
+    return 0;
+}
+
+
+
+______________________________________________________________________________________________________________________________________________________________________
+
+                              LEX
+
+                      **capital letter**
+
+ %{
+    #include<stdio.h>
+    #include<string.h>
+%}
+
+%%
+[A-Z] {printf("%s is a capital letter\n",yytext);}
+.  {printf("%s is not capital letter\n",yytext);}
+\n  ;
+%%
+
+int yywrap(){
+    return 1;
+}
+int main(){
+    printf("Enter the text:");
+    yylex();
+    return 0;
+}
+
+
+________________________________________________________________________
+
+                            ***count line tabs space****
+
+%{
+    #include<stdio.h>
+    int lc=0,tc=0,sc=0;
+%}
+
+%%
+[\n] {lc++;}
+[ ] {sc++;}
+[\t] {tc++;}
+%%
+
+int yywrap(){
+    return 1;
+}
+int main(){
+    printf("Enter the sentence:\n");
+    yylex();
+    printf("No. of lines: %d\n",lc);
+    printf("No. of tabs: %d\n",tc);
+    printf("No. of spaces: %d\n",sc);
+}
+
+
+________________________________________________________________________
+
+                                 *** Vowel or not ***
+
+%{
+#include <stdio.h>
+%}
+
+%%
+[aeiouAEIOU]    { printf("%s is a Vowel\n", yytext); }
+[a-zA-Z]        { printf("%s is a Consonant\n", yytext); }
+.               {printf("%s is not a Alphabet\n",yytext);} 
+\n              ;
+%%
+
+int yywrap() {
+    return 1;
+}
+
+int main() {
+    printf("Enter text:\n");
+    yylex();
+    return 0;
+}
+
+
+
+________________________________________________________________________
+
+
+                     *** Seperte***
+
+
+%{
+    #include<stdio.h>
+%}
+
+%%
+[ \t]+          { fputc(' ', yyout); }     
+\n+             { fputc(' ', yyout); }     
+.               { fputc(yytext[0], yyout); } 
+%%
+
+int yywrap(){
+    return 1;
+}
+int main(){
+    extern FILE *yyout, *yyin;
+    yyin=fopen("input.txt","r");
+    yyout=fopen("output.txt","w");
+    yylex();
+    fclose(yyin);
+    fclose(yyout);
+    return 0;
+}
+
+
+
+
